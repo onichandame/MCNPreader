@@ -55,7 +55,20 @@ class Input:
             if not (key=='' or value==''):
                 message[key]=value
     def readTitle(self,line):
+        self.title=line.strip()
 
+    def trucExpr(self,word):
+        tmp=word
+        tmp=re.sub(' +\(','(',tmp)
+        tmp=re.sub(' +\)',')',tmp)
+        tmp=re.sub(' +:',':',tmp)
+        tmp=re.sub(' +#','#',tmp)
+        tmp=re.sub('\( +','(',tmp)
+        tmp=re.sub('\) +',')',tmp)
+        tmp=re.sub(': +',':',tmp)
+        tmp=re.sub('# +','#',tmp)
+        tmp=re.sub(' +',' ',tmp)
+        return tmp
     def readCell(self,line):
         if len(line[0:5].split())==0:
         else:
@@ -79,17 +92,7 @@ class Input:
                 self._tmpcell_[field]=word
             elif field==self._cellfields_[3]:
                 self._tmpcell_[field]=[]
-                tmp=word
-                tmp=re.sub(' +\(','(',tmp)
-                tmp=re.sub(' +\)',')',tmp)
-                tmp=re.sub(' +:',':',tmp)
-                tmp=re.sub(' +#','#',tmp)
-                tmp=re.sub('\( +','(',tmp)
-                tmp=re.sub('\) +',')',tmp)
-                tmp=re.sub(': +',':',tmp)
-                tmp=re.sub('# +','#',tmp)
-                tmp=re.sub(' +',' ',tmp)
-                self._tmpcell_[field].append(tmp)
+                self._tmpcell_[field].append(self.trucExpr(word))
             elif field==self._cellfields_[4]:
                 if '=' in word:
                     tmp=word.split('=')
@@ -97,17 +100,7 @@ class Input:
                     if len(tmp>1):
                         self._tmpcell_[field][tmp[0]]=tmp[1]
                 else:
-                    tmp=word
-                    tmp=re.sub(' +\(','(',tmp)
-                    tmp=re.sub(' +\)',')',tmp)
-                    tmp=re.sub(' +:',':',tmp)
-                    tmp=re.sub(' +#','#',tmp)
-                    tmp=re.sub('\( +','(',tmp)
-                    tmp=re.sub('\) +',')',tmp)
-                    tmp=re.sub(': +',':',tmp)
-                    tmp=re.sub('# +','#',tmp)
-                    tmp=re.sub(' +',' ',tmp)
-                    self._tmpcell_[self._cellfields_[3]].append(tmp)
+                    self._tmpcell_[self._cellfields_[3]].append(self.trucExpr(word))
             else:
                 tmp=word.split('=')
                 if len(tmp>1):
@@ -165,36 +158,42 @@ class Input:
                 val=''
                 for word in words:
                     tmp=word.split('=')
-                    if len(tmp)<2:
-                        if not tmp[0]:
-                            continue
+                    tmp=[i for i in tmp if i]
+                    if '=' in word:
+                        val=''
+                        if len(tmp)<1 and not key:
+                            self.err.append(line)
+                        elif len(tmp<2):
+                            if key and '='+tmp[0]==word.strip():
+                                val=tmp[0]
+                            elif key and val and tmp[0]+'='==word.strip():
+                                self.data.source[key]=val
+                                key=tmp[0]
+                                val=''
+                    else:
                         if not key:
-                            key=tmp
+                            key=tmp[0]
                         elif not val:
-                            val=tmp
+                            val=tmp[0]
                         else:
-                            if type(self.data.source[key]==list):
-                                self.data.source[key].append(tmp[0])
+                            if type(val)==list:
+                                val.append(tmp[0])
                             else:
                                 lst=[]
-                                lst.append(self.data.source[key])
+                                lst.append(val)
                                 lst.append(tmp[0])
-                                self.data.source[key]=lst
-                    else:
-                        if key and val:
-                            self.data.source[key]=val
-                            key=tmp[0]
-                            val=tmp[1]
-                        else:
-                            self.err.append(line)
+                                val=lst
                 if key and val:
                     self.data.source[key]=val
+                else:
+                    self.err.append(line)
             '''Tally card
             '''
             elif self.data['current']==self._datafields_[1]:
             '''Material card
             '''
             elif self.data['current']==self._datafields_[2]:
+                if words[0][0:2].lower()=='mt'
             else:
                 '''Mode card
                 '''
