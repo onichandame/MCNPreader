@@ -193,7 +193,12 @@ class Input:
             '''Material card
             '''
             elif self.data['current']==self._datafields_[2]:
-                if words[0][0:2].lower()=='mt'
+                if words[0][0:2].lower()=='mt':
+                    if not 'mt' in self.data.keys():
+                        self.data['mt']={}
+                    elif not type(self.data['mt'])==dict:
+                        self.data['mt']={}
+                    self.data['current']
             else:
                 '''Mode card
                 '''
